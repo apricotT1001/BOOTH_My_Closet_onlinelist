@@ -40,7 +40,7 @@
   /* ── header ── */
   header {
     position: relative; z-index: 10;
-    padding: 1.75rem 1.5rem 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border);
     background: #ffffff;
   }
@@ -59,16 +59,79 @@
     font-family: 'DM Mono', monospace;
     font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.1em;
   }
+  .header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
   .header-count {
     font-family: 'DM Mono', monospace;
     font-size: 0.72rem; color: var(--text-muted);
     background: var(--surface2); border: 1px solid var(--border);
     padding: 0.2rem 0.7rem; border-radius: 99px;
   }
+  .sync-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .btn-sync {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 0.3rem 0.75rem;
+    border-radius: 7px; font-family: inherit; font-size: 0.78rem;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;
+  }
+  .btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sync.import:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-sync.clear:hover { border-color: #f87171; color: #f87171; }
+
+  /* ── tabs ── */
+  .tabs-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    display: flex; align-items: center;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    background: transparent; border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    padding: 0.65rem 0.85rem;
+    font-family: inherit; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 0.35rem;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-count {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem; border-radius: 99px; color: var(--text-muted);
+  }
+  .tab-btn.active .tab-count {
+    background: rgba(147,51,234,0.08); border-color: rgba(147,51,234,0.2); color: var(--accent);
+  }
+
+  .tab-del {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    font-size: 0.65rem; color: var(--text-muted);
+    border: 1px solid var(--border2);
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .tab-del:hover { background: rgba(248,113,113,0.15); color: #ef4444; border-color: #ef4444; }
+
+  .tab-add {
+    flex-shrink: 0;
+    background: transparent; border: none;
+    color: var(--text-muted); padding: 0.65rem 0.75rem;
+    font-size: 1.1rem; cursor: pointer; transition: color 0.15s;
+    margin-bottom: -1px;
+  }
+  .tab-add:hover { color: var(--accent); }
 
   /* ── controls ── */
   .controls {
-    position: relative; z-index: 10;
     max-width: 1200px; margin: 1.25rem auto 0;
     padding: 0 1.5rem;
     display: flex; flex-direction: column; gap: 0.7rem;
@@ -105,59 +168,33 @@
     transition: all 0.15s; white-space: nowrap;
   }
   .filter-btn:hover { border-color: var(--accent); color: var(--text); }
-  .filter-btn.active {
-    background: var(--accent); border-color: var(--accent);
-    color: #ffffff; font-weight: 700;
-  }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 
   /* ── grid ── */
   .grid {
-    position: relative; z-index: 10;
     max-width: 1200px; margin: 1.25rem auto 0;
     padding: 0 1.5rem 5rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0;
-    align-items: start;
+    gap: 0; align-items: start;
   }
-
-  /* divider between cards */
-  .card-wrap {
-    padding: 1.1rem 0;
-    border-bottom: 1px solid var(--border);
-  }
+  .card-wrap { padding: 1.1rem 0; border-bottom: 1px solid var(--border); }
   .card-wrap:first-child { padding-top: 0.5rem; }
-  .card-wrap:last-child  { border-bottom: none; }
+  .card-wrap:last-child { border-bottom: none; }
 
   /* ── card ── */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .card:hover {
-    border-color: var(--border2);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  }
+  .card:hover { border-color: var(--border2); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 
-  /* image gallery at top */
-  .card-gallery {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* サムネ: larger, left side */
-  .gallery-thumb {
-    flex: 0 0 55%;
-    position: relative; overflow: hidden;
-  }
+  .card-gallery { display: flex; border-bottom: 1px solid var(--border); }
+  .gallery-thumb { flex: 0 0 55%; position: relative; overflow: hidden; }
   .gallery-thumb img,
   .gallery-thumb .img-placeholder {
-    width: 100%; aspect-ratio: 1;
-    object-fit: cover; display: block;
-    background: var(--surface2);
+    width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--surface2);
   }
   .gallery-thumb .img-placeholder {
     display: flex; align-items: center; justify-content: center;
@@ -170,83 +207,43 @@
     padding: 0.6rem 0.4rem 0.3rem;
     font-family: 'DM Mono', monospace; text-align: center;
   }
+  .gallery-wears { flex: 1; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+  .gallery-wear-item { flex: 1; position: relative; overflow: hidden; }
+  .gallery-wear-item + .gallery-wear-item { border-top: 1px solid var(--border); }
+  .gallery-wear-item img { width: 100%; height: 100%; min-height: 60px; object-fit: cover; display: block; background: var(--surface2); }
+  .gallery-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.2rem; background: var(--surface2); min-height: 60px; }
 
-  /* 着用画像: stacked right side */
-  .gallery-wears {
-    flex: 1;
-    display: flex; flex-direction: column;
-    border-left: 1px solid var(--border);
-  }
-  .gallery-wear-item {
-    flex: 1; position: relative; overflow: hidden;
-  }
-  .gallery-wear-item + .gallery-wear-item {
-    border-top: 1px solid var(--border);
-  }
-  .gallery-wear-item img {
-    width: 100%; height: 100%; min-height: 60px;
-    object-fit: cover; display: block;
-    background: var(--surface2);
-  }
-  .gallery-empty {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted); font-size: 1.2rem;
-    background: var(--surface2); min-height: 60px;
-  }
-
-  /* card body */
-  .card-body {
-    padding: 0.85rem 1rem 1rem;
-  }
-
-  .card-top {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 0.5rem;
-    margin-bottom: 0.6rem;
-  }
-
+  .card-body { padding: 0.85rem 1rem 1rem; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.6rem; }
   .card-category {
-    display: inline-block;
-    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
-    padding: 0.18rem 0.5rem; border-radius: 4px;
-    white-space: nowrap;
+    display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 0.18rem 0.5rem; border-radius: 4px; white-space: nowrap;
   }
-  .cat-衣装       { background: rgba(190,24,93,0.1);   color: var(--tag-衣装); }
-  .cat-髪型       { background: rgba(194,65,12,0.1);   color: var(--tag-髪型); }
-  .cat-アクセサリー { background: rgba(4,120,87,0.1);    color: var(--tag-アクセサリー); }
-  .cat-システム   { background: rgba(3,105,161,0.1);   color: var(--tag-システム); }
-  .cat-アバター   { background: rgba(124,58,237,0.1);  color: var(--tag-アバター); }
-  .cat-ワールド   { background: rgba(15,118,110,0.1);  color: var(--tag-ワールド); }
-  .cat-テクスチャ  { background: rgba(146,64,14,0.1);   color: var(--tag-テクスチャ); }
-  .cat-その他     { background: rgba(109,40,217,0.1);  color: var(--tag-その他); }
+  .cat-衣装       { background: rgba(190,24,93,0.1);  color: var(--tag-衣装); }
+  .cat-髪型       { background: rgba(194,65,12,0.1);  color: var(--tag-髪型); }
+  .cat-アクセサリー { background: rgba(4,120,87,0.1);   color: var(--tag-アクセサリー); }
+  .cat-システム   { background: rgba(3,105,161,0.1);  color: var(--tag-システム); }
+  .cat-アバター   { background: rgba(124,58,237,0.1); color: var(--tag-アバター); }
+  .cat-ワールド   { background: rgba(15,118,110,0.1); color: var(--tag-ワールド); }
+  .cat-テクスチャ  { background: rgba(146,64,14,0.1);  color: var(--tag-テクスチャ); }
+  .cat-その他     { background: rgba(109,40,217,0.1); color: var(--tag-その他); }
 
-  .card-name {
-    font-size: 0.95rem; font-weight: 700; line-height: 1.35;
-    margin-bottom: 0.55rem;
-  }
-
-  /* avatars */
+  .card-name { font-size: 0.95rem; font-weight: 700; line-height: 1.35; margin-bottom: 0.55rem; }
   .detail-label {
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 0.3rem;
-    font-family: 'DM Mono', monospace;
+    color: var(--text-muted); margin-bottom: 0.3rem; font-family: 'DM Mono', monospace;
   }
   .avatar-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
   .avatar-chip {
     background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25);
     color: var(--accent2); font-size: 0.72rem; padding: 0.18rem 0.55rem; border-radius: 99px;
   }
-
-  /* memo */
   .detail-memo {
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 8px; padding: 0.55rem 0.75rem;
-    font-size: 0.8rem; color: var(--text-dim);
-    line-height: 1.6; white-space: pre-wrap;
+    font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; white-space: pre-wrap;
     margin-bottom: 0.7rem;
   }
-
-  /* actions */
   .card-actions { display: flex; gap: 0.45rem; }
   .action-btn {
     flex: 1; padding: 0.38rem 0; border-radius: 7px;
@@ -254,45 +251,35 @@
     transition: all 0.15s; display: flex; align-items: center;
     justify-content: center; gap: 0.3rem; text-decoration: none;
   }
-  .action-booth {
-    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
-  }
+  .action-booth { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
   .action-booth:hover { border-color: var(--accent); color: var(--accent); }
-  .action-edit {
-    background: transparent; border: 1px solid rgba(99,102,241,0.35); color: var(--accent2);
-  }
+  .action-edit { background: transparent; border: 1px solid rgba(99,102,241,0.35); color: var(--accent2); }
   .action-edit:hover { background: rgba(99,102,241,0.06); }
-  .action-delete {
-    flex: 0 0 auto; padding: 0.38rem 0.6rem;
-    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-  }
+  .action-delete { flex: 0 0 auto; padding: 0.38rem 0.6rem; background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
   .action-delete:hover { border-color: #f87171; color: #f87171; }
 
-  /* empty */
-  .empty {
-    position: relative; z-index: 10; grid-column: 1/-1;
-    text-align: center; padding: 4rem 1rem; color: var(--text-muted);
-  }
+  /* ── empty ── */
+  .empty { grid-column: 1/-1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
   .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.35; }
   .empty-text { font-size: 0.875rem; }
 
-  /* FAB */
+  /* ── FAB ── */
   .add-btn-float {
     position: fixed; bottom: 1.75rem; right: 1.5rem; z-index: 50;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; color: #0d0d14;
+    border: none; color: #fff;
     width: 50px; height: 50px; border-radius: 50%;
     font-size: 1.4rem; cursor: pointer;
-    box-shadow: 0 4px 20px rgba(192,132,252,0.35);
+    box-shadow: 0 4px 20px rgba(147,51,234,0.35);
     transition: transform 0.15s, box-shadow 0.15s;
     display: flex; align-items: center; justify-content: center;
   }
-  .add-btn-float:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(192,132,252,0.5); }
+  .add-btn-float:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(147,51,234,0.5); }
 
-  /* form overlay */
+  /* ── form overlay ── */
   .form-overlay {
     display: none; position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
     align-items: center; justify-content: center; padding: 1.5rem;
   }
   .form-overlay.open { display: flex; }
@@ -310,14 +297,12 @@
   .form-group label {
     display: block; font-size: 0.7rem; font-weight: 700;
     color: var(--text-muted); margin-bottom: 0.3rem;
-    letter-spacing: 0.07em; text-transform: uppercase;
-    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.07em; text-transform: uppercase; font-family: 'DM Mono', monospace;
   }
   .form-group input,
   .form-group select,
   .form-group textarea {
-    width: 100%;
-    background: var(--surface2); border: 1px solid var(--border);
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
     color: var(--text); padding: 0.55rem 0.85rem;
     border-radius: 8px; font-family: inherit; font-size: 0.875rem;
     outline: none; transition: border-color 0.2s;
@@ -335,78 +320,12 @@
   }
   .btn-cancel:hover { border-color: var(--accent); color: var(--text); }
   .btn-save {
-    flex: 2;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; color: #ffffff; padding: 0.6rem; border-radius: 8px;
+    flex: 2; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #fff; padding: 0.6rem; border-radius: 8px;
     font-family: inherit; font-size: 0.875rem; font-weight: 700;
     cursor: pointer; transition: opacity 0.15s;
   }
   .btn-save:hover { opacity: 0.85; }
-
-  /* ── tabs ── */
-  .tabs-bar {
-    position: relative; z-index: 10;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 1.5rem;
-    display: flex; align-items: center; gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .tabs-bar::-webkit-scrollbar { display: none; }
-
-  .tab-btn {
-    flex-shrink: 0;
-    background: transparent; border: none; border-bottom: 2px solid transparent;
-    color: var(--text-muted); padding: 0.7rem 1rem;
-    font-family: inherit; font-size: 0.85rem; font-weight: 700;
-    cursor: pointer; transition: all 0.15s; white-space: nowrap;
-    display: flex; align-items: center; gap: 0.35rem;
-    margin-bottom: -1px;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    color: var(--accent); border-bottom-color: var(--accent);
-  }
-  .tab-count {
-    font-family: 'DM Mono', monospace; font-size: 0.65rem;
-    background: var(--surface2); border: 1px solid var(--border);
-    padding: 0.1rem 0.4rem; border-radius: 99px;
-    color: var(--text-muted);
-  }
-  .tab-btn.active .tab-count {
-    background: rgba(147,51,234,0.1); border-color: rgba(147,51,234,0.25);
-    color: var(--accent);
-  }
-  .tab-add-btn {
-    flex-shrink: 0;
-    background: transparent; border: none;
-    color: var(--text-muted); padding: 0.7rem 0.75rem;
-    font-size: 1.1rem; cursor: pointer; transition: color 0.15s;
-    margin-bottom: -1px;
-  }
-  .tab-add-btn:hover { color: var(--accent); }
-
-  /* tab rename input */
-  .tab-btn input.tab-rename {
-    font-family: inherit; font-size: 0.85rem; font-weight: 700;
-    color: var(--accent); background: transparent;
-    border: none; border-bottom: 1px solid var(--accent);
-    outline: none; width: 80px; padding: 0;
-  }
-
-  /* ── export / import / clear ── */
-  .sync-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .btn-sync {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-dim); padding: 0.3rem 0.75rem;
-    border-radius: 7px; font-family: inherit; font-size: 0.78rem;
-    cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;
-  }
-  .btn-sync:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-sync.import:hover { border-color: var(--accent2); color: var(--accent2); }
-  .btn-sync.clear:hover { border-color: #f87171; color: #f87171; }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -427,12 +346,14 @@
       <span class="logo-main">booth closet</span>
       <span class="logo-sub">買ったもの</span>
     </div>
-    <div class="header-count" id="itemCount">0 items</div>
-    <div class="sync-btns">
-      <button class="btn-sync" id="exportBtn">📤 エクスポート</button>
-      <button class="btn-sync import" id="importBtn">📥 インポート</button>
-      <button class="btn-sync clear" id="clearBtn">🗑️ 全消去</button>
-      <input type="file" id="importFile" accept=".json" style="display:none">
+    <div class="header-right">
+      <div class="header-count" id="itemCount">0 items</div>
+      <div class="sync-btns">
+        <button class="btn-sync" id="exportBtn">📤 エクスポート</button>
+        <button class="btn-sync import" id="importBtn">📥 インポート</button>
+        <button class="btn-sync clear" id="clearBtn">🗑️ 全消去</button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+      </div>
     </div>
   </div>
 </header>
@@ -467,7 +388,6 @@
 </div>
 
 <div class="grid" id="grid"></div>
-
 <button class="add-btn-float" id="addBtn">＋</button>
 
 <div class="form-overlay" id="formOverlay">
@@ -522,18 +442,10 @@
 </div>
 
 <script>
+// ── 定数 ──
 const CAT_ORDER = ['衣装','髪型','アクセサリー','システム','アバター','ワールド','テクスチャ','その他'];
-const TABS_KEY  = 'booth_closet_tabs';   // タブ一覧
-const DATA_KEY  = (name) => `booth_closet_data__${name}`; // タブ別データ
-
-// ── タブ管理 ──
-let tabs = [];       // [{name, label}]
-let currentTab = ''; // 現在のタブのname(キー)
-let items = [];
-let currentCat = 'all';
-let searchQuery = '';
-let sortMode = 'added_desc';
-let editingId = null;
+const TABS_KEY  = 'bcc_tabs_v1';
+const dataKey   = n => 'bcc_data_v1__' + n;
 
 const SAMPLE = [
   { id:1, addedAt:1, name:'フリルワンピース -Lumière-', category:'衣装',
@@ -559,81 +471,110 @@ const SAMPLE = [
     wearImages:[], memo:'4096x4096 PSD付き' }
 ];
 
-function loadTabs() {
-  try {
-    const raw = localStorage.getItem(TABS_KEY);
-    tabs = raw ? JSON.parse(raw) : [];
-  } catch { tabs = []; }
-  // 初回：デフォルトタブを作成
+// ── 状態 ──
+let tabs = [];
+let currentTab = '';
+let items = [];
+let currentCat = 'all';
+let searchQuery = '';
+let sortMode = 'added_desc';
+let editingId = null;
+
+// ── ユーティリティ ──
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getItems(name) {
+  try { const r = localStorage.getItem(dataKey(name)); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+function setItems(name, data) { localStorage.setItem(dataKey(name), JSON.stringify(data)); }
+function nextId() { return items.length ? Math.max(...items.map(i=>i.id))+1 : 1; }
+
+// ── タブ初期化 ──
+function initTabs() {
+  try { const r = localStorage.getItem(TABS_KEY); tabs = r ? JSON.parse(r) : []; }
+  catch { tabs = []; }
   if (!tabs.length) {
-    tabs = [{ name: 'default', label: 'マイリスト' }];
-    saveTabs();
-    localStorage.setItem(DATA_KEY('default'), JSON.stringify(SAMPLE));
+    tabs = [{ name:'default', label:'マイリスト' }];
+    localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+    setItems('default', SAMPLE);
   }
   currentTab = tabs[0].name;
+  items = getItems(currentTab);
 }
-
 function saveTabs() { localStorage.setItem(TABS_KEY, JSON.stringify(tabs)); }
+function saveItems() { setItems(currentTab, items); }
 
-function loadItems() {
-  try {
-    const raw = localStorage.getItem(DATA_KEY(currentTab));
-    items = raw ? JSON.parse(raw) : [];
-  } catch { items = []; }
-}
-
-function saveItems() { localStorage.setItem(DATA_KEY(currentTab), JSON.stringify(items)); }
-
-function tabItemCount(name) {
-  try {
-    const raw = localStorage.getItem(DATA_KEY(name));
-    return raw ? JSON.parse(raw).length : 0;
-  } catch { return 0; }
-}
-
-// ── タブUI描画 ──
+// ── タブ描画 ──
 function renderTabs() {
   const bar = document.getElementById('tabsBar');
-  bar.innerHTML = tabs.map(t => `
-    <button class="tab-btn${t.name === currentTab ? ' active' : ''}" data-name="${t.name}">
-      <span class="tab-label">${esc(t.label)}</span>
-      <span class="tab-count">${tabItemCount(t.name)}</span>
-    </button>
-  `).join('') + `<button class="tab-add-btn" id="tabAddBtn" title="タブを追加">＋</button>`;
+  const showDel = tabs.length > 1;
 
-  // タブクリック・リネーム
-  bar.querySelectorAll('.tab-btn').forEach(btn => {
+  bar.innerHTML = '';
+
+  tabs.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (t.name === currentTab ? ' active' : '');
+    btn.dataset.name = t.name;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'tab-label';
+    labelSpan.textContent = t.label;
+
+    const countSpan = document.createElement('span');
+    countSpan.className = 'tab-count';
+    countSpan.textContent = getItems(t.name).length;
+
+    btn.appendChild(labelSpan);
+    btn.appendChild(countSpan);
+
+    if (showDel) {
+      const delSpan = document.createElement('span');
+      delSpan.className = 'tab-del';
+      delSpan.textContent = '×';
+      delSpan.title = 'タブを削除';
+      delSpan.addEventListener('click', e => {
+        e.stopPropagation();
+        deleteTab(t.name);
+      });
+      btn.appendChild(delSpan);
+    }
+
+    // シングルクリック：切り替え、ダブルクリック／長押し：リネーム
     let clickTimer = null;
-
     btn.addEventListener('click', () => {
-      // ダブルクリック判定のため少し待つ
-      clickTimer = setTimeout(() => switchTab(btn.dataset.name), 220);
+      clickTimer = setTimeout(() => switchTab(t.name), 220);
     });
-
-    // ダブルクリックでリネーム（PC）
     btn.addEventListener('dblclick', () => {
-      clearTimeout(clickTimer); // シングルクリック処理をキャンセル
-      startRename(btn);
+      clearTimeout(clickTimer);
+      renameTab(t.name);
     });
-
-    // 長押しでリネーム（スマホ）
     let pressTimer;
     btn.addEventListener('touchstart', () => {
-      pressTimer = setTimeout(() => startRename(btn), 600);
-    }, { passive: true });
-    btn.addEventListener('touchend', () => clearTimeout(pressTimer));
+      pressTimer = setTimeout(() => { clearTimeout(clickTimer); renameTab(t.name); }, 600);
+    }, { passive:true });
+    btn.addEventListener('touchend',  () => clearTimeout(pressTimer));
     btn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+    bar.appendChild(btn);
   });
-  document.getElementById('tabAddBtn').addEventListener('click', addTab);
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tab-add';
+  addBtn.textContent = '＋';
+  addBtn.title = 'タブを追加';
+  addBtn.addEventListener('click', addTab);
+  bar.appendChild(addBtn);
 }
 
 function switchTab(name) {
   currentTab = name;
-  loadItems();
+  items = getItems(currentTab);
   currentCat = 'all';
   searchQuery = '';
   document.getElementById('searchInput').value = '';
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='all'));
   renderTabs();
   render();
 }
@@ -644,40 +585,53 @@ function addTab() {
   const name = 'tab_' + Date.now();
   tabs.push({ name, label: label.trim() });
   saveTabs();
-  localStorage.setItem(DATA_KEY(name), JSON.stringify([]));
+  setItems(name, []);
   switchTab(name);
 }
 
-function startRename(btn) {
-  const tab = tabs.find(t => t.name === btn.dataset.name);
+function renameTab(name) {
+  const tab = tabs.find(t => t.name === name);
   if (!tab) return;
   const newLabel = prompt('タブ名を入力してください：', tab.label);
-  if (newLabel === null) return; // キャンセル
+  if (newLabel === null) return;
   tab.label = newLabel.trim() || tab.label;
   saveTabs();
   renderTabs();
 }
 
-// ── アイテム描画 ──
-function nextId() { return items.length ? Math.max(...items.map(i => i.id)) + 1 : 1; }
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function deleteTab(name) {
+  const tab = tabs.find(t => t.name === name);
+  if (!tab) return;
+  const count = getItems(name).length;
+  const msg = count > 0
+    ? `「${tab.label}」を削除しますか？\n（${count}件のデータも一緒に削除されます）`
+    : `「${tab.label}」を削除しますか？`;
+  if (!confirm(msg)) return;
+  localStorage.removeItem(dataKey(name));
+  tabs = tabs.filter(t => t.name !== name);
+  saveTabs();
+  if (currentTab === name) {
+    currentTab = tabs[0].name;
+    items = getItems(currentTab);
+  }
+  renderTabs();
+  render();
 }
 
+// ── アイテム描画 ──
 function sortList(list) {
   const c = [...list];
-  if (sortMode === 'added_desc') return c.sort((a,b) => (b.addedAt||b.id)-(a.addedAt||a.id));
-  if (sortMode === 'added_asc')  return c.sort((a,b) => (a.addedAt||a.id)-(b.addedAt||b.id));
-  if (sortMode === 'name_asc')   return c.sort((a,b) => a.name.localeCompare(b.name,'ja'));
-  if (sortMode === 'name_desc')  return c.sort((a,b) => b.name.localeCompare(a.name,'ja'));
-  if (sortMode === 'category')   return c.sort((a,b) => CAT_ORDER.indexOf(a.category)-CAT_ORDER.indexOf(b.category));
+  if (sortMode==='added_desc') return c.sort((a,b)=>(b.addedAt||b.id)-(a.addedAt||a.id));
+  if (sortMode==='added_asc')  return c.sort((a,b)=>(a.addedAt||a.id)-(b.addedAt||b.id));
+  if (sortMode==='name_asc')   return c.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  if (sortMode==='name_desc')  return c.sort((a,b)=>b.name.localeCompare(a.name,'ja'));
+  if (sortMode==='category')   return c.sort((a,b)=>CAT_ORDER.indexOf(a.category)-CAT_ORDER.indexOf(b.category));
   return c;
 }
 
 function render() {
   const grid = document.getElementById('grid');
   document.getElementById('itemCount').textContent = `${items.length} items`;
-
   let list = items;
   if (currentCat !== 'all') list = list.filter(i => i.category === currentCat);
   if (searchQuery) {
@@ -689,7 +643,6 @@ function render() {
     );
   }
   list = sortList(list);
-
   if (!list.length) {
     grid.innerHTML = '<div class="empty"><div class="empty-icon">✦</div><div class="empty-text">アイテムが見つかりません</div></div>';
     return;
@@ -698,12 +651,12 @@ function render() {
 }
 
 function buildCard(item) {
-  const wears = (item.wearImages || []).filter(Boolean);
+  const wears = (item.wearImages||[]).filter(Boolean);
   const thumbHtml = item.thumb
     ? `<img src="${esc(item.thumb)}" alt="${esc(item.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\"img-placeholder\\">🛍️</div>'">`
     : `<div class="img-placeholder">🛍️</div>`;
   const wearsHtml = wears.length
-    ? wears.map((u, i) => `<div class="gallery-wear-item"><img src="${esc(u)}" alt="着用 ${i+1}" loading="lazy"><div class="img-label">着用 ${i+1}</div></div>`).join('')
+    ? wears.map((u,i)=>`<div class="gallery-wear-item"><img src="${esc(u)}" alt="着用${i+1}" loading="lazy"><div class="img-label">着用 ${i+1}</div></div>`).join('')
     : `<div class="gallery-empty">📷</div>`;
   const avatarChips = item.avatars.length
     ? `<div class="detail-label">対応アバター</div><div class="avatar-chips">${item.avatars.map(a=>`<span class="avatar-chip">${esc(a)}</span>`).join('')}</div>`
@@ -733,7 +686,7 @@ function buildCard(item) {
 </div>`;
 }
 
-// ── filter / search / sort ──
+// ── フィルター / ソート ──
 document.getElementById('filterRow').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
@@ -745,7 +698,7 @@ document.getElementById('filterRow').addEventListener('click', e => {
 document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; render(); });
 document.getElementById('sortSelect').addEventListener('change', e => { sortMode = e.target.value; render(); });
 
-// ── add/edit form ──
+// ── アイテム追加・編集フォーム ──
 document.getElementById('addBtn').addEventListener('click', () => openForm(null));
 document.getElementById('cancelForm').addEventListener('click', closeForm);
 document.getElementById('formOverlay').addEventListener('click', e => {
@@ -769,7 +722,7 @@ function openForm(id) {
 function openEdit(id) { openForm(id); }
 function closeForm() { document.getElementById('formOverlay').classList.remove('open'); editingId = null; }
 
-// ── URL → base64 ──
+// ── base64変換 ──
 async function urlToBase64(url) {
   if (!url || url.startsWith('data:')) return url;
   try {
@@ -784,7 +737,6 @@ async function urlToBase64(url) {
     });
   } catch { return url; }
 }
-
 async function embedImages(data) {
   const [thumb, w1, w2] = await Promise.all([
     urlToBase64(data.thumb ?? ''),
@@ -809,7 +761,6 @@ document.getElementById('saveForm').addEventListener('click', async () => {
     memo: document.getElementById('f_memo').value.trim()
   };
 
-  // 編集時、画像URLが空の場合は既存のbase64を保持
   if (editingId) {
     const existing = items.find(i => i.id === editingId);
     if (existing) {
@@ -836,11 +787,10 @@ function deleteItem(id) {
   saveItems(); renderTabs(); render();
 }
 
-// ── 全消去（確認2段階）──
+// ── 全消去 ──
 document.getElementById('clearBtn').addEventListener('click', () => {
   const tab = tabs.find(t => t.name === currentTab);
-  const label = tab?.label ?? 'このタブ';
-  if (!confirm(`「${label}」のアイテムを全件削除しますか？\nこの操作は取り消せません。`)) return;
+  if (!confirm(`「${tab?.label}」のアイテムを全件削除しますか？\nこの操作は取り消せません。`)) return;
   if (!confirm(`本当によろしいですか？\n${items.length}件のデータがすべて消えます。`)) return;
   items = [];
   saveItems(); renderTabs(); render();
@@ -851,20 +801,18 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   const btn = document.getElementById('exportBtn');
   btn.textContent = '⏳ 変換中…'; btn.disabled = true;
   const embedded = await Promise.all(items.map(item => embedImages(item)));
-  const json = JSON.stringify(embedded, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const tab = tabs.find(t => t.name === currentTab);
   const date = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = `booth-closet-${tab?.label ?? 'list'}-${date}.json`;
+  const blob = new Blob([JSON.stringify(embedded, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `booth-closet-${tab?.label??'list'}-${date}.json`;
   a.click(); URL.revokeObjectURL(url);
   btn.textContent = '📤 エクスポート'; btn.disabled = false;
 });
 
 // ── インポート ──
 document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-
 document.getElementById('importFile').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -874,8 +822,8 @@ document.getElementById('importFile').addEventListener('change', e => {
       const imported = JSON.parse(ev.target.result);
       if (!Array.isArray(imported)) { alert('ファイルの形式が正しくありません'); return; }
       if (!confirm(`${imported.length}件のデータをインポートします。\n現在のタブに追加されます。よろしいですか？`)) return;
-      const maxId = items.length ? Math.max(...items.map(i => i.id)) : 0;
-      const merged = imported.map((item, idx) => ({ ...item, id: maxId + idx + 1 }));
+      const maxId = items.length ? Math.max(...items.map(i=>i.id)) : 0;
+      const merged = imported.map((item,idx) => ({ ...item, id: maxId+idx+1 }));
       items = [...items, ...merged];
       const seen = new Set();
       items = items.filter(item => {
@@ -885,15 +833,14 @@ document.getElementById('importFile').addEventListener('change', e => {
       });
       saveItems(); renderTabs(); render();
       alert('インポート完了しました（重複は除外済み）');
-    } catch { alert('読み込みに失敗しました。JSONファイルか確認してください'); }
+    } catch { alert('読み込みに失敗しました'); }
   };
   reader.readAsText(file);
   e.target.value = '';
 });
 
-// ── init ──
-loadTabs();
-loadItems();
+// ── 初期化 ──
+initTabs();
 renderTabs();
 render();
 </script>
