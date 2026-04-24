@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>booth closet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f5f4f2;
+    --surface: #ffffff;
+    --surface2: #f0eeec;
+    --border: #e2ddd8;
+    --border2: #cdc8c2;
+    --accent: #9333ea;
+    --accent2: #6366f1;
+    --text: #1e1a17;
+    --text-muted: #8a8480;
+    --text-dim: #5c5854;
+    --tag-衣装: #be185d;
+    --tag-髪型: #c2410c;
+    --tag-アクセサリー: #047857;
+    --tag-システム: #0369a1;
+    --tag-アバター: #7c3aed;
+    --tag-ワールド: #0f766e;
+    --tag-テクスチャ: #92400e;
+    --tag-その他: #6d28d9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── header ── */
+  header {
+    position: relative; z-index: 10;
+    padding: 1.75rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: #ffffff;
+  }
+  .header-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    align-items: center; justify-content: space-between;
+  }
+  .logo { display: flex; align-items: baseline; gap: 0.5rem; }
+  .logo-main {
+    font-size: 1.5rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.1em;
+  }
+  .header-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; color: var(--text-muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.2rem 0.7rem; border-radius: 99px;
+  }
+
+  /* ── controls ── */
+  .controls {
+    position: relative; z-index: 10;
+    max-width: 1200px; margin: 1.25rem auto 0;
+    padding: 0 1.5rem;
+    display: flex; flex-direction: column; gap: 0.7rem;
+  }
+  .controls-top { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
+  .search-wrap { position: relative; flex: 1; min-width: 180px; }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 0.55rem 1rem 0.55rem 2.4rem;
+    border-radius: 8px; font-family: inherit; font-size: 0.875rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 0.85rem; pointer-events: none;
+  }
+  .sort-select {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 0.55rem 2rem 0.55rem 0.9rem;
+    border-radius: 8px; font-family: inherit; font-size: 0.8rem;
+    outline: none; cursor: pointer; transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.7rem center;
+  }
+  .sort-select:focus { border-color: var(--accent); }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .filter-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 0.35rem 0.8rem; border-radius: 99px;
+    font-family: inherit; font-size: 0.78rem; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #ffffff; font-weight: 700;
+  }
+
+  /* ── grid ── */
+  .grid {
+    position: relative; z-index: 10;
+    max-width: 1200px; margin: 1.25rem auto 0;
+    padding: 0 1.5rem 5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0;
+    align-items: start;
+  }
+
+  /* divider between cards */
+  .card-wrap {
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-wrap:first-child { padding-top: 0.5rem; }
+  .card-wrap:last-child  { border-bottom: none; }
+
+  /* ── card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+
+  /* image gallery at top */
+  .card-gallery {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* サムネ: larger, left side */
+  .gallery-thumb {
+    flex: 0 0 55%;
+    position: relative; overflow: hidden;
+  }
+  .gallery-thumb img,
+  .gallery-thumb .img-placeholder {
+    width: 100%; aspect-ratio: 1;
+    object-fit: cover; display: block;
+    background: var(--surface2);
+  }
+  .gallery-thumb .img-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--text-muted);
+  }
+  .img-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    font-size: 0.6rem; color: rgba(255,255,255,0.65);
+    padding: 0.6rem 0.4rem 0.3rem;
+    font-family: 'DM Mono', monospace; text-align: center;
+  }
+
+  /* 着用画像: stacked right side */
+  .gallery-wears {
+    flex: 1;
+    display: flex; flex-direction: column;
+    border-left: 1px solid var(--border);
+  }
+  .gallery-wear-item {
+    flex: 1; position: relative; overflow: hidden;
+  }
+  .gallery-wear-item + .gallery-wear-item {
+    border-top: 1px solid var(--border);
+  }
+  .gallery-wear-item img {
+    width: 100%; height: 100%; min-height: 60px;
+    object-fit: cover; display: block;
+    background: var(--surface2);
+  }
+  .gallery-empty {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 1.2rem;
+    background: var(--surface2); min-height: 60px;
+  }
+
+  /* card body */
+  .card-body {
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .card-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-category {
+    display: inline-block;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 0.18rem 0.5rem; border-radius: 4px;
+    white-space: nowrap;
+  }
+  .cat-衣装       { background: rgba(190,24,93,0.1);   color: var(--tag-衣装); }
+  .cat-髪型       { background: rgba(194,65,12,0.1);   color: var(--tag-髪型); }
+  .cat-アクセサリー { background: rgba(4,120,87,0.1);    color: var(--tag-アクセサリー); }
+  .cat-システム   { background: rgba(3,105,161,0.1);   color: var(--tag-システム); }
+  .cat-アバター   { background: rgba(124,58,237,0.1);  color: var(--tag-アバター); }
+  .cat-ワールド   { background: rgba(15,118,110,0.1);  color: var(--tag-ワールド); }
+  .cat-テクスチャ  { background: rgba(146,64,14,0.1);   color: var(--tag-テクスチャ); }
+  .cat-その他     { background: rgba(109,40,217,0.1);  color: var(--tag-その他); }
+
+  .card-name {
+    font-size: 0.95rem; font-weight: 700; line-height: 1.35;
+    margin-bottom: 0.55rem;
+  }
+
+  /* avatars */
+  .detail-label {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.3rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .avatar-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
+  .avatar-chip {
+    background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25);
+    color: var(--accent2); font-size: 0.72rem; padding: 0.18rem 0.55rem; border-radius: 99px;
+  }
+
+  /* memo */
+  .detail-memo {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.55rem 0.75rem;
+    font-size: 0.8rem; color: var(--text-dim);
+    line-height: 1.6; white-space: pre-wrap;
+    margin-bottom: 0.7rem;
+  }
+
+  /* actions */
+  .card-actions { display: flex; gap: 0.45rem; }
+  .action-btn {
+    flex: 1; padding: 0.38rem 0; border-radius: 7px;
+    font-family: inherit; font-size: 0.75rem; cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center;
+    justify-content: center; gap: 0.3rem; text-decoration: none;
+  }
+  .action-booth {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .action-booth:hover { border-color: var(--accent); color: var(--accent); }
+  .action-edit {
+    background: transparent; border: 1px solid rgba(99,102,241,0.35); color: var(--accent2);
+  }
+  .action-edit:hover { background: rgba(99,102,241,0.06); }
+  .action-delete {
+    flex: 0 0 auto; padding: 0.38rem 0.6rem;
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+  }
+  .action-delete:hover { border-color: #f87171; color: #f87171; }
+
+  /* empty */
+  .empty {
+    position: relative; z-index: 10; grid-column: 1/-1;
+    text-align: center; padding: 4rem 1rem; color: var(--text-muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.35; }
+  .empty-text { font-size: 0.875rem; }
+
+  /* FAB */
+  .add-btn-float {
+    position: fixed; bottom: 1.75rem; right: 1.5rem; z-index: 50;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #0d0d14;
+    width: 50px; height: 50px; border-radius: 50%;
+    font-size: 1.4rem; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(192,132,252,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .add-btn-float:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(192,132,252,0.5); }
+
+  /* form overlay */
+  .form-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .form-overlay.open { display: flex; }
+  .form-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; max-width: 520px;
+    max-height: 90vh; overflow-y: auto; padding: 1.5rem;
+  }
+  .form-title {
+    font-size: 1.05rem; font-weight: 900; margin-bottom: 1.2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .form-group { margin-bottom: 0.9rem; }
+  .form-group label {
+    display: block; font-size: 0.7rem; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 0.3rem;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 0.55rem 0.85rem;
+    border-radius: 8px; font-family: inherit; font-size: 0.875rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 65px; }
+  .form-group select option { background: var(--surface2); }
+  .form-actions { display: flex; gap: 0.75rem; margin-top: 1.1rem; }
+  .btn-cancel {
+    flex: 1; background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 0.6rem; border-radius: 8px;
+    font-family: inherit; font-size: 0.875rem; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--accent); color: var(--text); }
+  .btn-save {
+    flex: 2;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #ffffff; padding: 0.6rem; border-radius: 8px;
+    font-family: inherit; font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* ── export / import ── */
+  .sync-btns { display: flex; gap: 0.5rem; }
+  .btn-sync {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 0.3rem 0.75rem;
+    border-radius: 7px; font-family: inherit; font-size: 0.78rem;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;
+  }
+  .btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sync.import:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 500px) {
+    .logo-main { font-size: 1.2rem; }
+    .grid { grid-template-columns: 1fr; padding: 0 1rem 5rem; }
+    .controls { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-main">booth closet</span>
+      <span class="logo-sub">買ったもの</span>
+    </div>
+    <div class="header-count" id="itemCount">0 items</div>
+    <div class="sync-btns">
+      <button class="btn-sync" id="exportBtn">📤 エクスポート</button>
+      <button class="btn-sync import" id="importBtn">📥 インポート</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-top">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="商品名・アバター名で検索…">
+    </div>
+    <select class="sort-select" id="sortSelect">
+      <option value="added_desc">追加順（新しい順）</option>
+      <option value="added_asc">追加順（古い順）</option>
+      <option value="name_asc">名前順（A→Z）</option>
+      <option value="name_desc">名前順（Z→A）</option>
+      <option value="category">カテゴリ順</option>
+    </select>
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="filter-btn active" data-cat="all">すべて</button>
+    <button class="filter-btn" data-cat="衣装">衣装</button>
+    <button class="filter-btn" data-cat="髪型">髪型</button>
+    <button class="filter-btn" data-cat="アクセサリー">アクセサリー</button>
+    <button class="filter-btn" data-cat="システム">システム</button>
+    <button class="filter-btn" data-cat="アバター">アバター</button>
+    <button class="filter-btn" data-cat="ワールド">ワールド</button>
+    <button class="filter-btn" data-cat="テクスチャ">テクスチャ</button>
+    <button class="filter-btn" data-cat="その他">その他</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<button class="add-btn-float" id="addBtn">＋</button>
+
+<div class="form-overlay" id="formOverlay">
+  <div class="form-modal">
+    <div class="form-title" id="formTitle">✦ アイテムを追加</div>
+    <div class="form-group">
+      <label>商品名 *</label>
+      <input type="text" id="f_name" placeholder="例: ふわもこパーカー">
+    </div>
+    <div class="form-group">
+      <label>カテゴリ</label>
+      <select id="f_cat">
+        <option value="衣装">衣装</option>
+        <option value="髪型">髪型</option>
+        <option value="アクセサリー">アクセサリー</option>
+        <option value="システム">システム</option>
+        <option value="アバター">アバター</option>
+        <option value="ワールド">ワールド</option>
+        <option value="テクスチャ">テクスチャ</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>対応アバター（カンマ区切り）</label>
+      <input type="text" id="f_avatars" placeholder="例: 桔梗, ここあ, 萌">
+    </div>
+    <div class="form-group">
+      <label>booth URL</label>
+      <input type="url" id="f_url" placeholder="https://booth.pm/ja/items/…">
+    </div>
+    <div class="form-group">
+      <label>サムネ画像 URL</label>
+      <input type="url" id="f_thumb" placeholder="https://…">
+    </div>
+    <div class="form-group">
+      <label>着用画像 URL 1</label>
+      <input type="url" id="f_wear1" placeholder="https://…">
+    </div>
+    <div class="form-group">
+      <label>着用画像 URL 2</label>
+      <input type="url" id="f_wear2" placeholder="https://…">
+    </div>
+    <div class="form-group">
+      <label>メモ</label>
+      <textarea id="f_memo" placeholder="色違いあり、Unity設定メモなど…"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" id="cancelForm">キャンセル</button>
+      <button class="btn-save" id="saveForm">保存する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'booth_closet_v2';
+const CAT_ORDER = ['衣装','髪型','アクセサリー','システム','アバター','ワールド','テクスチャ','その他'];
+
+const SAMPLE = [
+  { id:1, addedAt:1, name:'フリルワンピース -Lumière-', category:'衣装',
+    avatars:['桔梗','ここあ','萌'], url:'https://booth.pm',
+    thumb:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80',
+    wearImages:['https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80','https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80'],
+    memo:'ピンク・ブラック・ホワイトの3色入り\nPhysBone設定済み' },
+  { id:2, addedAt:2, name:'ツインテール [ふわふわ長め]', category:'髪型',
+    avatars:['桔梗','セレスティア'], url:'https://booth.pm',
+    thumb:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80',
+    wearImages:['https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=400&q=80'], memo:'' },
+  { id:3, addedAt:3, name:'Lolita Headband with Bow', category:'アクセサリー',
+    avatars:['桔梗','ここあ','萌','セレスティア','Manuka'], url:'https://booth.pm',
+    thumb:'https://images.unsplash.com/photo-1588701957016-2428d18c3cdc?w=400&q=80',
+    wearImages:[], memo:'ModularAvatar対応済み\nワッペン用パッチあり' },
+  { id:4, addedAt:4, name:'ストリートジャケット TYPE-Z', category:'衣装',
+    avatars:['萌','ましろ'], url:'https://booth.pm',
+    thumb:'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&q=80',
+    wearImages:['https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80'], memo:'' },
+  { id:5, addedAt:5, name:'グリッターアイシャドウ テクスチャ', category:'テクスチャ',
+    avatars:['桔梗'], url:'https://booth.pm',
+    thumb:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&q=80',
+    wearImages:[], memo:'4096x4096 PSD付き' }
+];
+
+let items = [];
+let currentCat = 'all';
+let searchQuery = '';
+let sortMode = 'added_desc';
+let editingId = null;
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { items = JSON.parse(raw); }
+    else { items = SAMPLE; saveData(); }
+  } catch { items = SAMPLE; }
+}
+
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function nextId() { return items.length ? Math.max(...items.map(i => i.id)) + 1 : 1; }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function sortList(list) {
+  const c = [...list];
+  if (sortMode === 'added_desc') return c.sort((a,b) => (b.addedAt||b.id)-(a.addedAt||a.id));
+  if (sortMode === 'added_asc')  return c.sort((a,b) => (a.addedAt||a.id)-(b.addedAt||b.id));
+  if (sortMode === 'name_asc')   return c.sort((a,b) => a.name.localeCompare(b.name,'ja'));
+  if (sortMode === 'name_desc')  return c.sort((a,b) => b.name.localeCompare(a.name,'ja'));
+  if (sortMode === 'category')   return c.sort((a,b) => CAT_ORDER.indexOf(a.category)-CAT_ORDER.indexOf(b.category));
+  return c;
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  document.getElementById('itemCount').textContent = `${items.length} items`;
+
+  let list = items;
+  if (currentCat !== 'all') list = list.filter(i => i.category === currentCat);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(i =>
+      i.name.toLowerCase().includes(q) ||
+      i.avatars.some(a => a.toLowerCase().includes(q)) ||
+      (i.memo && i.memo.toLowerCase().includes(q))
+    );
+  }
+  list = sortList(list);
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">✦</div><div class="empty-text">アイテムが見つかりません</div></div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(item => `<div class="card-wrap">${buildCard(item)}</div>`).join('');
+}
+
+function buildCard(item) {
+  const wears = (item.wearImages || []).filter(Boolean);
+
+  // gallery: サムネ left + 着用画像 right (stacked)
+  const thumbHtml = item.thumb
+    ? `<img src="${esc(item.thumb)}" alt="${esc(item.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\"img-placeholder\\">🛍️</div>'">`
+    : `<div class="img-placeholder">🛍️</div>`;
+
+  let wearsHtml = '';
+  if (wears.length) {
+    wearsHtml = wears.map((u, i) => `
+      <div class="gallery-wear-item">
+        <img src="${esc(u)}" alt="着用 ${i+1}" loading="lazy">
+        <div class="img-label">着用 ${i+1}</div>
+      </div>`).join('');
+  } else {
+    wearsHtml = `<div class="gallery-empty">📷</div>`;
+  }
+
+  const avatarChips = item.avatars.length
+    ? `<div class="detail-label">対応アバター</div>
+       <div class="avatar-chips">${item.avatars.map(a=>`<span class="avatar-chip">${esc(a)}</span>`).join('')}</div>`
+    : '';
+
+  const memoHtml = item.memo
+    ? `<div class="detail-label" style="margin-top:0.65rem">メモ</div>
+       <div class="detail-memo">${esc(item.memo)}</div>`
+    : '';
+
+  const boothBtn = item.url
+    ? `<a class="action-btn action-booth" href="${esc(item.url)}" target="_blank" rel="noopener">🛒 booth</a>`
+    : '';
+
+  return `
+<div class="card" data-id="${item.id}">
+  <div class="card-gallery">
+    <div class="gallery-thumb">
+      ${thumbHtml}
+    </div>
+    <div class="gallery-wears">${wearsHtml}</div>
+  </div>
+  <div class="card-body">
+    <div class="card-top">
+      <span class="card-category cat-${item.category}">${esc(item.category)}</span>
+    </div>
+    <div class="card-name">${esc(item.name)}</div>
+    ${avatarChips}
+    ${memoHtml}
+    <div class="card-actions" style="margin-top:${(item.avatars.length||item.memo)?'0.7rem':'0'}">
+      ${boothBtn}
+      <button class="action-btn action-edit" onclick="openEdit(${item.id})">✏️ 編集</button>
+      <button class="action-btn action-delete" onclick="deleteItem(${item.id})">🗑️</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// filter / search / sort
+document.getElementById('filterRow').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = btn.dataset.cat;
+  render();
+});
+document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; render(); });
+document.getElementById('sortSelect').addEventListener('change', e => { sortMode = e.target.value; render(); });
+
+// form
+document.getElementById('addBtn').addEventListener('click', () => openForm(null));
+document.getElementById('cancelForm').addEventListener('click', closeForm);
+document.getElementById('formOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('formOverlay')) closeForm();
+});
+
+function openForm(id) {
+  editingId = id;
+  const item = id ? items.find(i => i.id === id) : null;
+  document.getElementById('formTitle').textContent = id ? '✦ アイテムを編集' : '✦ アイテムを追加';
+  document.getElementById('f_name').value    = item?.name ?? '';
+  document.getElementById('f_cat').value     = item?.category ?? '衣装';
+  document.getElementById('f_avatars').value = item ? item.avatars.join(', ') : '';
+  document.getElementById('f_url').value     = item?.url ?? '';
+  document.getElementById('f_thumb').value   = item?.thumb ?? '';
+  document.getElementById('f_wear1').value   = item?.wearImages?.[0] ?? '';
+  document.getElementById('f_wear2').value   = item?.wearImages?.[1] ?? '';
+  document.getElementById('f_memo').value    = item?.memo ?? '';
+  document.getElementById('formOverlay').classList.add('open');
+}
+function openEdit(id) { openForm(id); }
+function closeForm() { document.getElementById('formOverlay').classList.remove('open'); editingId = null; }
+
+document.getElementById('saveForm').addEventListener('click', () => {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { alert('商品名を入力してください'); return; }
+  const data = {
+    name, category: document.getElementById('f_cat').value,
+    avatars: document.getElementById('f_avatars').value.split(/[,、]/).map(s=>s.trim()).filter(Boolean),
+    url: document.getElementById('f_url').value.trim(),
+    thumb: document.getElementById('f_thumb').value.trim(),
+    wearImages: [document.getElementById('f_wear1').value.trim(), document.getElementById('f_wear2').value.trim()].filter(Boolean),
+    memo: document.getElementById('f_memo').value.trim()
+  };
+  if (editingId) {
+    const idx = items.findIndex(i => i.id === editingId);
+    if (idx >= 0) items[idx] = { ...items[idx], ...data };
+  } else {
+    items.push({ id: nextId(), addedAt: Date.now(), ...data });
+  }
+  saveData(); render(); closeForm();
+});
+
+function deleteItem(id) {
+  if (!confirm('このアイテムを削除しますか？')) return;
+  items = items.filter(i => i.id !== id);
+  saveData(); render();
+}
+
+// ── export ──
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const json = JSON.stringify(items, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `booth-closet-${date}.json`;
+  a.click(); URL.revokeObjectURL(url);
+});
+
+// ── import ──
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported)) { alert('ファイルの形式が正しくありません'); return; }
+      if (!confirm(`${imported.length}件のデータをインポートします。\n現在のデータに追加されます。よろしいですか？`)) return;
+      // IDの衝突を避けて追加
+      const maxId = items.length ? Math.max(...items.map(i => i.id)) : 0;
+      const merged = imported.map((item, idx) => ({ ...item, id: maxId + idx + 1 }));
+      items = [...items, ...merged];
+      // 重複除去（nameとcategoryが同じものは除く）
+      const seen = new Set();
+      items = items.filter(item => {
+        const key = `${item.name}__${item.category}`;
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+      saveData(); render();
+      alert(`インポート完了しました（重複は除外済み）`);
+    } catch { alert('読み込みに失敗しました。JSONファイルか確認してください'); }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // 同じファイルを再選択できるようリセット
+});
+
+loadData();
+render();
+</script>
+</body>
+</html>
