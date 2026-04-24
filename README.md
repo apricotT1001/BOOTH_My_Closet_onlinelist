@@ -9,3 +9,7 @@ https://apricott1001.github.io/BOOTH_My_Closet_onlinelist/ </br>
 </br>
 作ったリストは右上のエクスポートからjsonデータを書き出しして、別のPCやスマートフォンからインポートすると見れるようになります。</br>
 jsonを共有してほかの人に改変に使用したアイテムリストを渡すもよし、改変アイデア出しに自分のリストを複数端末から開くのもよし、自由に使ってください。</br>
+</br>
+</br>
+見本用に私の購入品リストを添付しておきます。
+<img width="936" height="750" alt="image" src="https://github.com/user-attachments/assets/8dd75e6c-9232-45f0-b452-735c7f66e9b7" />
