@@ -343,8 +343,60 @@
   }
   .btn-save:hover { opacity: 0.85; }
 
-  /* ── export / import ── */
-  .sync-btns { display: flex; gap: 0.5rem; }
+  /* ── tabs ── */
+  .tabs-bar {
+    position: relative; z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    display: flex; align-items: center; gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    color: var(--text-muted); padding: 0.7rem 1rem;
+    font-family: inherit; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    display: flex; align-items: center; gap: 0.35rem;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent); border-bottom-color: var(--accent);
+  }
+  .tab-count {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem; border-radius: 99px;
+    color: var(--text-muted);
+  }
+  .tab-btn.active .tab-count {
+    background: rgba(147,51,234,0.1); border-color: rgba(147,51,234,0.25);
+    color: var(--accent);
+  }
+  .tab-add-btn {
+    flex-shrink: 0;
+    background: transparent; border: none;
+    color: var(--text-muted); padding: 0.7rem 0.75rem;
+    font-size: 1.1rem; cursor: pointer; transition: color 0.15s;
+    margin-bottom: -1px;
+  }
+  .tab-add-btn:hover { color: var(--accent); }
+
+  /* tab rename input */
+  .tab-btn input.tab-rename {
+    font-family: inherit; font-size: 0.85rem; font-weight: 700;
+    color: var(--accent); background: transparent;
+    border: none; border-bottom: 1px solid var(--accent);
+    outline: none; width: 80px; padding: 0;
+  }
+
+  /* ── export / import / clear ── */
+  .sync-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .btn-sync {
     background: var(--surface); border: 1px solid var(--border);
     color: var(--text-dim); padding: 0.3rem 0.75rem;
@@ -354,6 +406,7 @@
   }
   .btn-sync:hover { border-color: var(--accent); color: var(--accent); }
   .btn-sync.import:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-sync.clear:hover { border-color: #f87171; color: #f87171; }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -378,10 +431,13 @@
     <div class="sync-btns">
       <button class="btn-sync" id="exportBtn">📤 エクスポート</button>
       <button class="btn-sync import" id="importBtn">📥 インポート</button>
+      <button class="btn-sync clear" id="clearBtn">🗑️ 全消去</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
   </div>
 </header>
+
+<div class="tabs-bar" id="tabsBar"></div>
 
 <div class="controls">
   <div class="controls-top">
@@ -466,8 +522,18 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'booth_closet_v2';
 const CAT_ORDER = ['衣装','髪型','アクセサリー','システム','アバター','ワールド','テクスチャ','その他'];
+const TABS_KEY  = 'booth_closet_tabs';   // タブ一覧
+const DATA_KEY  = (name) => `booth_closet_data__${name}`; // タブ別データ
+
+// ── タブ管理 ──
+let tabs = [];       // [{name, label}]
+let currentTab = ''; // 現在のタブのname(キー)
+let items = [];
+let currentCat = 'all';
+let searchQuery = '';
+let sortMode = 'added_desc';
+let editingId = null;
 
 const SAMPLE = [
   { id:1, addedAt:1, name:'フリルワンピース -Lumière-', category:'衣装',
@@ -493,21 +559,106 @@ const SAMPLE = [
     wearImages:[], memo:'4096x4096 PSD付き' }
 ];
 
-let items = [];
-let currentCat = 'all';
-let searchQuery = '';
-let sortMode = 'added_desc';
-let editingId = null;
-
-function loadData() {
+function loadTabs() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { items = JSON.parse(raw); }
-    else { items = SAMPLE; saveData(); }
-  } catch { items = SAMPLE; }
+    const raw = localStorage.getItem(TABS_KEY);
+    tabs = raw ? JSON.parse(raw) : [];
+  } catch { tabs = []; }
+  // 初回：デフォルトタブを作成
+  if (!tabs.length) {
+    tabs = [{ name: 'default', label: 'マイリスト' }];
+    saveTabs();
+    localStorage.setItem(DATA_KEY('default'), JSON.stringify(SAMPLE));
+  }
+  currentTab = tabs[0].name;
 }
 
-function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function saveTabs() { localStorage.setItem(TABS_KEY, JSON.stringify(tabs)); }
+
+function loadItems() {
+  try {
+    const raw = localStorage.getItem(DATA_KEY(currentTab));
+    items = raw ? JSON.parse(raw) : [];
+  } catch { items = []; }
+}
+
+function saveItems() { localStorage.setItem(DATA_KEY(currentTab), JSON.stringify(items)); }
+
+function tabItemCount(name) {
+  try {
+    const raw = localStorage.getItem(DATA_KEY(name));
+    return raw ? JSON.parse(raw).length : 0;
+  } catch { return 0; }
+}
+
+// ── タブUI描画 ──
+function renderTabs() {
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML = tabs.map(t => `
+    <button class="tab-btn${t.name === currentTab ? ' active' : ''}" data-name="${t.name}">
+      <span class="tab-label">${esc(t.label)}</span>
+      <span class="tab-count">${tabItemCount(t.name)}</span>
+    </button>
+  `).join('') + `<button class="tab-add-btn" id="tabAddBtn" title="タブを追加">＋</button>`;
+
+  // タブクリック・リネーム
+  bar.querySelectorAll('.tab-btn').forEach(btn => {
+    let clickTimer = null;
+
+    btn.addEventListener('click', () => {
+      // ダブルクリック判定のため少し待つ
+      clickTimer = setTimeout(() => switchTab(btn.dataset.name), 220);
+    });
+
+    // ダブルクリックでリネーム（PC）
+    btn.addEventListener('dblclick', () => {
+      clearTimeout(clickTimer); // シングルクリック処理をキャンセル
+      startRename(btn);
+    });
+
+    // 長押しでリネーム（スマホ）
+    let pressTimer;
+    btn.addEventListener('touchstart', () => {
+      pressTimer = setTimeout(() => startRename(btn), 600);
+    }, { passive: true });
+    btn.addEventListener('touchend', () => clearTimeout(pressTimer));
+    btn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+  });
+  document.getElementById('tabAddBtn').addEventListener('click', addTab);
+}
+
+function switchTab(name) {
+  currentTab = name;
+  loadItems();
+  currentCat = 'all';
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+  renderTabs();
+  render();
+}
+
+function addTab() {
+  const label = prompt('新しいタブの名前を入力してください：');
+  if (!label || !label.trim()) return;
+  const name = 'tab_' + Date.now();
+  tabs.push({ name, label: label.trim() });
+  saveTabs();
+  localStorage.setItem(DATA_KEY(name), JSON.stringify([]));
+  switchTab(name);
+}
+
+function startRename(btn) {
+  const tab = tabs.find(t => t.name === btn.dataset.name);
+  if (!tab) return;
+  const newLabel = prompt('タブ名を入力してください：', tab.label);
+  if (newLabel === null) return; // キャンセル
+  tab.label = newLabel.trim() || tab.label;
+  saveTabs();
+  renderTabs();
+}
+
+// ── アイテム描画 ──
 function nextId() { return items.length ? Math.max(...items.map(i => i.id)) + 1 : 1; }
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -543,58 +694,36 @@ function render() {
     grid.innerHTML = '<div class="empty"><div class="empty-icon">✦</div><div class="empty-text">アイテムが見つかりません</div></div>';
     return;
   }
-
   grid.innerHTML = list.map(item => `<div class="card-wrap">${buildCard(item)}</div>`).join('');
 }
 
 function buildCard(item) {
   const wears = (item.wearImages || []).filter(Boolean);
-
-  // gallery: サムネ left + 着用画像 right (stacked)
   const thumbHtml = item.thumb
     ? `<img src="${esc(item.thumb)}" alt="${esc(item.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\"img-placeholder\\">🛍️</div>'">`
     : `<div class="img-placeholder">🛍️</div>`;
-
-  let wearsHtml = '';
-  if (wears.length) {
-    wearsHtml = wears.map((u, i) => `
-      <div class="gallery-wear-item">
-        <img src="${esc(u)}" alt="着用 ${i+1}" loading="lazy">
-        <div class="img-label">着用 ${i+1}</div>
-      </div>`).join('');
-  } else {
-    wearsHtml = `<div class="gallery-empty">📷</div>`;
-  }
-
+  const wearsHtml = wears.length
+    ? wears.map((u, i) => `<div class="gallery-wear-item"><img src="${esc(u)}" alt="着用 ${i+1}" loading="lazy"><div class="img-label">着用 ${i+1}</div></div>`).join('')
+    : `<div class="gallery-empty">📷</div>`;
   const avatarChips = item.avatars.length
-    ? `<div class="detail-label">対応アバター</div>
-       <div class="avatar-chips">${item.avatars.map(a=>`<span class="avatar-chip">${esc(a)}</span>`).join('')}</div>`
+    ? `<div class="detail-label">対応アバター</div><div class="avatar-chips">${item.avatars.map(a=>`<span class="avatar-chip">${esc(a)}</span>`).join('')}</div>`
     : '';
-
   const memoHtml = item.memo
-    ? `<div class="detail-label" style="margin-top:0.65rem">メモ</div>
-       <div class="detail-memo">${esc(item.memo)}</div>`
+    ? `<div class="detail-label" style="margin-top:0.65rem">メモ</div><div class="detail-memo">${esc(item.memo)}</div>`
     : '';
-
   const boothBtn = item.url
     ? `<a class="action-btn action-booth" href="${esc(item.url)}" target="_blank" rel="noopener">🛒 booth</a>`
     : '';
-
   return `
 <div class="card" data-id="${item.id}">
   <div class="card-gallery">
-    <div class="gallery-thumb">
-      ${thumbHtml}
-    </div>
+    <div class="gallery-thumb">${thumbHtml}</div>
     <div class="gallery-wears">${wearsHtml}</div>
   </div>
   <div class="card-body">
-    <div class="card-top">
-      <span class="card-category cat-${item.category}">${esc(item.category)}</span>
-    </div>
+    <div class="card-top"><span class="card-category cat-${item.category}">${esc(item.category)}</span></div>
     <div class="card-name">${esc(item.name)}</div>
-    ${avatarChips}
-    ${memoHtml}
+    ${avatarChips}${memoHtml}
     <div class="card-actions" style="margin-top:${(item.avatars.length||item.memo)?'0.7rem':'0'}">
       ${boothBtn}
       <button class="action-btn action-edit" onclick="openEdit(${item.id})">✏️ 編集</button>
@@ -604,7 +733,7 @@ function buildCard(item) {
 </div>`;
 }
 
-// filter / search / sort
+// ── filter / search / sort ──
 document.getElementById('filterRow').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
@@ -616,7 +745,7 @@ document.getElementById('filterRow').addEventListener('click', e => {
 document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; render(); });
 document.getElementById('sortSelect').addEventListener('change', e => { sortMode = e.target.value; render(); });
 
-// form
+// ── add/edit form ──
 document.getElementById('addBtn').addEventListener('click', () => openForm(null));
 document.getElementById('cancelForm').addEventListener('click', closeForm);
 document.getElementById('formOverlay').addEventListener('click', e => {
@@ -631,19 +760,47 @@ function openForm(id) {
   document.getElementById('f_cat').value     = item?.category ?? '衣装';
   document.getElementById('f_avatars').value = item ? item.avatars.join(', ') : '';
   document.getElementById('f_url').value     = item?.url ?? '';
-  document.getElementById('f_thumb').value   = item?.thumb ?? '';
-  document.getElementById('f_wear1').value   = item?.wearImages?.[0] ?? '';
-  document.getElementById('f_wear2').value   = item?.wearImages?.[1] ?? '';
+  document.getElementById('f_thumb').value   = item?.thumb?.startsWith('data:') ? '' : (item?.thumb ?? '');
+  document.getElementById('f_wear1').value   = item?.wearImages?.[0]?.startsWith('data:') ? '' : (item?.wearImages?.[0] ?? '');
+  document.getElementById('f_wear2').value   = item?.wearImages?.[1]?.startsWith('data:') ? '' : (item?.wearImages?.[1] ?? '');
   document.getElementById('f_memo').value    = item?.memo ?? '';
   document.getElementById('formOverlay').classList.add('open');
 }
 function openEdit(id) { openForm(id); }
 function closeForm() { document.getElementById('formOverlay').classList.remove('open'); editingId = null; }
 
-document.getElementById('saveForm').addEventListener('click', () => {
+// ── URL → base64 ──
+async function urlToBase64(url) {
+  if (!url || url.startsWith('data:')) return url;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return url;
+    const blob = await res.blob();
+    return await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(url);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return url; }
+}
+
+async function embedImages(data) {
+  const [thumb, w1, w2] = await Promise.all([
+    urlToBase64(data.thumb ?? ''),
+    urlToBase64(data.wearImages?.[0] ?? ''),
+    urlToBase64(data.wearImages?.[1] ?? ''),
+  ]);
+  return { ...data, thumb, wearImages: [w1, w2].filter(Boolean) };
+}
+
+document.getElementById('saveForm').addEventListener('click', async () => {
   const name = document.getElementById('f_name').value.trim();
   if (!name) { alert('商品名を入力してください'); return; }
-  const data = {
+  const btn = document.getElementById('saveForm');
+  btn.textContent = '画像を取得中…'; btn.disabled = true;
+
+  const raw = {
     name, category: document.getElementById('f_cat').value,
     avatars: document.getElementById('f_avatars').value.split(/[,、]/).map(s=>s.trim()).filter(Boolean),
     url: document.getElementById('f_url').value.trim(),
@@ -651,36 +808,62 @@ document.getElementById('saveForm').addEventListener('click', () => {
     wearImages: [document.getElementById('f_wear1').value.trim(), document.getElementById('f_wear2').value.trim()].filter(Boolean),
     memo: document.getElementById('f_memo').value.trim()
   };
+
+  // 編集時、画像URLが空の場合は既存のbase64を保持
+  if (editingId) {
+    const existing = items.find(i => i.id === editingId);
+    if (existing) {
+      if (!raw.thumb && existing.thumb?.startsWith('data:')) raw.thumb = existing.thumb;
+      if (!raw.wearImages[0] && existing.wearImages?.[0]?.startsWith('data:')) raw.wearImages[0] = existing.wearImages[0];
+      if (!raw.wearImages[1] && existing.wearImages?.[1]?.startsWith('data:')) raw.wearImages[1] = existing.wearImages[1];
+    }
+  }
+
+  const data = await embedImages(raw);
   if (editingId) {
     const idx = items.findIndex(i => i.id === editingId);
     if (idx >= 0) items[idx] = { ...items[idx], ...data };
   } else {
     items.push({ id: nextId(), addedAt: Date.now(), ...data });
   }
-  saveData(); render(); closeForm();
+  btn.textContent = '保存する'; btn.disabled = false;
+  saveItems(); renderTabs(); render(); closeForm();
 });
 
 function deleteItem(id) {
   if (!confirm('このアイテムを削除しますか？')) return;
   items = items.filter(i => i.id !== id);
-  saveData(); render();
+  saveItems(); renderTabs(); render();
 }
 
-// ── export ──
-document.getElementById('exportBtn').addEventListener('click', () => {
-  const json = JSON.stringify(items, null, 2);
+// ── 全消去（確認2段階）──
+document.getElementById('clearBtn').addEventListener('click', () => {
+  const tab = tabs.find(t => t.name === currentTab);
+  const label = tab?.label ?? 'このタブ';
+  if (!confirm(`「${label}」のアイテムを全件削除しますか？\nこの操作は取り消せません。`)) return;
+  if (!confirm(`本当によろしいですか？\n${items.length}件のデータがすべて消えます。`)) return;
+  items = [];
+  saveItems(); renderTabs(); render();
+});
+
+// ── エクスポート ──
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportBtn');
+  btn.textContent = '⏳ 変換中…'; btn.disabled = true;
+  const embedded = await Promise.all(items.map(item => embedImages(item)));
+  const json = JSON.stringify(embedded, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+  const tab = tabs.find(t => t.name === currentTab);
   const date = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = `booth-closet-${date}.json`;
+  a.href = url; a.download = `booth-closet-${tab?.label ?? 'list'}-${date}.json`;
   a.click(); URL.revokeObjectURL(url);
+  btn.textContent = '📤 エクスポート'; btn.disabled = false;
 });
 
-// ── import ──
-document.getElementById('importBtn').addEventListener('click', () => {
-  document.getElementById('importFile').click();
-});
+// ── インポート ──
+document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
 
 document.getElementById('importFile').addEventListener('change', e => {
   const file = e.target.files[0];
@@ -690,27 +873,28 @@ document.getElementById('importFile').addEventListener('change', e => {
     try {
       const imported = JSON.parse(ev.target.result);
       if (!Array.isArray(imported)) { alert('ファイルの形式が正しくありません'); return; }
-      if (!confirm(`${imported.length}件のデータをインポートします。\n現在のデータに追加されます。よろしいですか？`)) return;
-      // IDの衝突を避けて追加
+      if (!confirm(`${imported.length}件のデータをインポートします。\n現在のタブに追加されます。よろしいですか？`)) return;
       const maxId = items.length ? Math.max(...items.map(i => i.id)) : 0;
       const merged = imported.map((item, idx) => ({ ...item, id: maxId + idx + 1 }));
       items = [...items, ...merged];
-      // 重複除去（nameとcategoryが同じものは除く）
       const seen = new Set();
       items = items.filter(item => {
         const key = `${item.name}__${item.category}`;
         if (seen.has(key)) return false;
         seen.add(key); return true;
       });
-      saveData(); render();
-      alert(`インポート完了しました（重複は除外済み）`);
+      saveItems(); renderTabs(); render();
+      alert('インポート完了しました（重複は除外済み）');
     } catch { alert('読み込みに失敗しました。JSONファイルか確認してください'); }
   };
   reader.readAsText(file);
-  e.target.value = ''; // 同じファイルを再選択できるようリセット
+  e.target.value = '';
 });
 
-loadData();
+// ── init ──
+loadTabs();
+loadItems();
+renderTabs();
 render();
 </script>
 </body>
